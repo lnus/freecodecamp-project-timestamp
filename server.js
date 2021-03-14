@@ -26,6 +26,16 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+function isValidDate(d) {
+  // quickly checks if it's a date
+  return d instanceof Date && !isNaN(d);
+};
+
+app.get("/api/timestamp", (req, res) => {
+  // fancy one-liner to return current unix and utc times in case of no input
+  res.json({unix: Date.parse(new Date()), utc: new Date().toUTCString()});
+})
+
 app.get("/api/timestamp/:date", (req, res) => {
   let date = req.params["date"];
 
@@ -34,10 +44,13 @@ app.get("/api/timestamp/:date", (req, res) => {
 
   // convert it into readable data using .toDateString()
   let localeDate = new Date(unixTimestamp).toUTCString();
-  console.log(localeDate);
 
-  // returns the unix timestamp and the utc date
-  res.json({unix: unixTimestamp, utc: localeDate});
+  if(isValidDate(new Date(localeDate))) {
+    // returns the unix timestamp and the utc date
+    res.json({unix: unixTimestamp, utc: localeDate});
+  } else {
+    res.json({error: "Invalid Date"});
+  }
 });
 
 // listen for requests :)
